@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未发送信件焚烧炉 | The Unsent Crematorium</title>
+  <meta name="description" content="写下你不敢发送的话，看它化为灰烬，收到一封来自平行时空的回信。">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Background Particles -->
+  <canvas id="ambient-canvas"></canvas>
+  
+  <main class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">未发送信件焚烧炉</h1>
+      <p class="subtitle">The Unsent Crematorium</p>
+      <p class="tagline">写下你不敢发送的话，让它化为灰烬</p>
+    </header>
+
+    <!-- Input Section -->
+    <section class="input-section" id="input-section">
+      <div class="input-container">
+        <textarea 
+          id="unsent-message" 
+          class="message-input" 
+          placeholder="在这里写下那段你一直想说，却不敢发送的话..."
+          maxlength="500"
+        ></textarea>
+        <div class="char-count">
+          <span id="char-current">0</span> / 500
+        </div>
+      </div>
+      
+      <div class="recipient-section">
+        <label class="recipient-label">这段话是写给谁的？（可选）</label>
+        <input 
+          type="text" 
+          id="recipient" 
+          class="recipient-input" 
+          placeholder="前任、暗恋的人、已故的亲人..."
+        >
+      </div>
+    </section>
+
+    <!-- Cremation Section -->
+    <section class="cremation-section" id="cremation-section">
+      <div class="letter-container" id="letter-container">
+        <div class="letter" id="letter">
+          <p class="letter-content" id="letter-content"></p>
+        </div>
+      </div>
+      
+      <canvas id="fire-canvas"></canvas>
+      
+      <button class="burn-button" id="burn-button">
+        <span class="burn-text">长按焚烧</span>
+        <svg class="burn-progress" viewBox="0 0 100 100">
+          <circle class="progress-bg" cx="50" cy="50" r="45"/>
+          <circle class="progress-ring" cx="50" cy="50" r="45" id="progress-ring"/>
+        </svg>
+      </button>
+      
+      <p class="burn-hint">按住按钮 1.5 秒，让这些话化为灰烬</p>
+    </section>
+
+    <!-- Reply Section -->
+    <section class="reply-section" id="reply-section">
+      <div class="envelope" id="envelope">
+        <div class="envelope-flap"></div>
+        <div class="envelope-body">
+          <div class="reply-letter" id="reply-letter">
+            <p class="reply-from">来自平行时空的回信</p>
+            <div class="reply-content" id="reply-content">
+              <!-- AI generated reply will appear here -->
+            </div>
+            <p class="reply-signature" id="reply-signature"></p>
+          </div>
+        </div>
+      </div>
+      
+      <button class="restart-button" id="restart-button">
+        再写一封
+      </button>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
