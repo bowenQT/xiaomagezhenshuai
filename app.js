@@ -3,13 +3,6 @@
  * 主交互逻辑
  */
 
-import { QiniuAI } from '@bowenqt/qiniu-ai-sdk';
-
-// 初始化 AI 客户端
-const client = new QiniuAI({
-  apiKey: import.meta.env.VITE_QINIU_API_KEY || 'demo-fallback-key'
-});
-
 // ============================================
 // State Management
 // ============================================
@@ -186,35 +179,19 @@ class FireParticles {
 // AI Reply Generation
 // ============================================
 async function generateReply(message, recipient) {
-  const recipientText = recipient ? `写给${recipient}的` : '写给某人的';
-
   try {
-    const response = await client.chat.create({
-      model: 'gemini-2.5-flash',
-      messages: [
-        {
-          role: 'system',
-          content: `你是一个来自平行时空的人，需要代替用户希望收到回信的那个人，给用户写一封温暖、治愈的回信。
-这封信是用户${recipientText}，但他们不敢发送。现在你要扮演那个人回复这封信。
-
-回信要求：
-1. 语气温暖但不矫情，像是那个人真的会说的话
-2. 理解用户的情感，给予适当的回应和安慰
-3. 帮助用户释怀，但不要说教
-4. 长度适中，100-200字
-5. 结尾可以有祝福，但要自然
-6. 不要提到"平行时空"或暴露你是AI`
-        },
-        {
-          role: 'user',
-          content: `用户写的信：\n"${message}"\n\n请写一封回信。`
-        }
-      ],
-      temperature: 0.8,
-      max_tokens: 300
+    const response = await fetch('/api/reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, recipient })
     });
 
-    return response.choices[0].message.content;
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.reply;
   } catch (error) {
     console.error('AI generation failed:', error);
     return generateFallbackReply(message, recipient);
