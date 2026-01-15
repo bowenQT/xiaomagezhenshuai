@@ -50,7 +50,12 @@ const elements = {
   shareCardPreview: document.getElementById('share-card-preview'),
   downloadButton: document.getElementById('download-button'),
   // V1.2 新元素
-  emberTooltip: document.getElementById('ember-tooltip')
+  emberTooltip: document.getElementById('ember-tooltip'),
+  // V1.3 新元素
+  listenButton: document.getElementById('listen-button'),
+  listenIcon: document.getElementById('listen-icon'),
+  listenText: document.getElementById('listen-text'),
+  replyAudio: document.getElementById('reply-audio')
 };
 
 // ============================================
@@ -379,6 +384,111 @@ function downloadShareCard() {
 }
 
 // ============================================
+// V1.3 听见回信 (TTS)
+// ============================================
+let isPlaying = false;
+let currentReplyText = '';
+
+async function playReplyAudio() {
+  if (!elements.listenButton || !elements.replyAudio) return;
+
+  // 如果正在播放，则暂停
+  if (isPlaying) {
+    elements.replyAudio.pause();
+    elements.replyAudio.currentTime = 0;
+    resetListenButton();
+    return;
+  }
+
+  // 获取回信内容
+  currentReplyText = elements.replyContent.textContent || '';
+  if (!currentReplyText) return;
+
+  // 设置加载状态
+  elements.listenButton.classList.add('loading');
+  elements.listenText.textContent = '生成中...';
+
+  // 触觉反馈（开始）
+  triggerHaptic('light');
+
+  try {
+    const response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: currentReplyText })
+    });
+
+    if (!response.ok) {
+      throw new Error('TTS generation failed');
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      // 设置音频源
+      if (data.audioUrl) {
+        elements.replyAudio.src = data.audioUrl;
+      } else if (data.audioBase64) {
+        elements.replyAudio.src = `data:${data.contentType};base64,${data.audioBase64}`;
+      }
+
+      // 播放
+      elements.listenButton.classList.remove('loading');
+      elements.listenButton.classList.add('playing');
+      elements.listenIcon.textContent = '⏸️';
+      elements.listenText.textContent = '暂停';
+      isPlaying = true;
+
+      // 触觉反馈（开始播放）
+      triggerHaptic('medium');
+
+      await elements.replyAudio.play();
+    } else {
+      throw new Error(data.error || 'Unknown error');
+    }
+  } catch (error) {
+    console.error('TTS playback failed:', error);
+    elements.listenButton.classList.remove('loading');
+    elements.listenText.textContent = '听见回信';
+
+    // 触觉反馈（错误）
+    triggerHaptic('error');
+  }
+}
+
+function resetListenButton() {
+  isPlaying = false;
+  if (elements.listenButton) {
+    elements.listenButton.classList.remove('playing', 'loading');
+  }
+  if (elements.listenIcon) {
+    elements.listenIcon.textContent = '🎧';
+  }
+  if (elements.listenText) {
+    elements.listenText.textContent = '听见回信';
+  }
+}
+
+// ============================================
+// V1.3 触觉反馈
+// ============================================
+function triggerHaptic(type = 'light') {
+  // 检查是否支持振动 API
+  if (!navigator.vibrate) return;
+
+  const patterns = {
+    light: [10],           // 轻触
+    medium: [30],          // 中等
+    heavy: [50],           // 重
+    success: [20, 50, 20], // 成功
+    error: [100, 50, 100], // 错误
+    burn: [50, 30, 80, 40, 120] // 焚烧特效
+  };
+
+  navigator.vibrate(patterns[type] || patterns.light);
+}
+
+// ============================================
 // Burn Interaction
 // ============================================
 let fireSystem = null;
@@ -445,6 +555,9 @@ function completeBurn() {
 
   // Start letter burning animation
   elements.letter.classList.add('burning');
+
+  // V1.3: 触觉反馈（焚烧特效）
+  triggerHaptic('burn');
 
   // Intensify fire briefly
   setTimeout(() => {
@@ -565,6 +678,16 @@ function initEventListeners() {
         closeShareModal();
       }
     });
+  }
+
+  // V1.3: Listen button
+  if (elements.listenButton) {
+    elements.listenButton.addEventListener('click', playReplyAudio);
+  }
+
+  // V1.3: Audio ended event
+  if (elements.replyAudio) {
+    elements.replyAudio.addEventListener('ended', resetListenButton);
   }
 }
 

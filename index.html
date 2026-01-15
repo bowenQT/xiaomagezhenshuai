@@ -121,6 +121,11 @@
       
       <!-- Action Buttons -->
       <div class="reply-actions">
+        <!-- V1.3: 听见回信 -->
+        <button class="listen-button" id="listen-button">
+          <span class="listen-icon" id="listen-icon">🎧</span>
+          <span class="listen-text" id="listen-text">听见回信</span>
+        </button>
         <button class="share-button" id="share-button">
           <span class="share-icon">✨</span>
           <span class="share-text">留作纪念</span>
@@ -129,6 +134,9 @@
           再写一封
         </button>
       </div>
+      
+      <!-- V1.3: Audio Player (Hidden) -->
+      <audio id="reply-audio" style="display: none;"></audio>
       
       <!-- Share Card Preview Modal -->
       <div class="share-modal" id="share-modal">
