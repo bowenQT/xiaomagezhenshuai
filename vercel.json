@@ -1,9 +1,4 @@
 {
-    "build": {
-        "env": {
-            "NODE_VERSION": "22"
-        }
-    },
     "rewrites": [
         {
             "source": "/(.*)",
@@ -12,7 +7,6 @@
     ],
     "functions": {
         "api/reply.js": {
-            "runtime": "@vercel/node@3.0.0",
             "maxDuration": 30
         }
     }

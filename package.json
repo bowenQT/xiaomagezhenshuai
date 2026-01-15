@@ -4,6 +4,9 @@
   "description": "未发送信件焚烧炉 | The Unsent Crematorium",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
