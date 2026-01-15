@@ -195,6 +195,73 @@ body {
   border-color: var(--accent-gold);
 }
 
+/* Gender Picker - Dark Ethereal Style */
+.recipient-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.recipient-row .recipient-input {
+  flex: 1;
+}
+
+.gender-picker {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.gender-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gender-icon {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+
+.gender-btn:hover .gender-icon {
+  color: var(--text-secondary);
+}
+
+/* Female - Pink/Rose glow */
+.gender-btn[data-gender="female"].active {
+  background: rgba(236, 72, 153, 0.15);
+  border-color: rgba(236, 72, 153, 0.5);
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.3);
+}
+
+.gender-btn[data-gender="female"].active .gender-icon {
+  color: #ec4899;
+  text-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
+}
+
+/* Male - Blue glow */
+.gender-btn[data-gender="male"].active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.gender-btn[data-gender="male"].active .gender-icon {
+  color: #3b82f6;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
 /* Submit Button - Dark Ethereal Style */
 .submit-button {
   position: relative;

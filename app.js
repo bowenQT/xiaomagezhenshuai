@@ -14,6 +14,7 @@ const state = {
   message: '',
   recipient: '',
   persona: null, // 'gentle' | 'strict' | 'playful' | 'regretful'
+  gender: null, // 'female' | 'male' | null (AI infer)
   extractedQuote: '',
   isHolding: false,
   holdStartTime: 0,
@@ -44,6 +45,7 @@ const elements = {
   restartButton: document.getElementById('restart-button'),
   // V1.1 新元素
   personaChips: document.getElementById('persona-chips'),
+  genderPicker: document.getElementById('gender-picker'),
   shareButton: document.getElementById('share-button'),
   shareModal: document.getElementById('share-modal'),
   modalClose: document.getElementById('modal-close'),
@@ -530,7 +532,8 @@ async function playReplyAudio() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         text: currentReplyText,
-        persona: state.persona // 传递人设以匹配音色
+        persona: state.persona, // 人设
+        gender: state.gender   // 性别（用于匹配音色）
       })
     });
 
@@ -769,6 +772,27 @@ function initEventListeners() {
       } else {
         state.persona = null;
       }
+    });
+  }
+
+  // V1.3.1: Gender selection for TTS voice matching
+  if (elements.genderPicker) {
+    elements.genderPicker.addEventListener('click', (e) => {
+      const btn = e.target.closest('.gender-btn');
+      if (!btn) return;
+
+      // Toggle selection
+      const wasActive = btn.classList.contains('active');
+      document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+
+      if (!wasActive) {
+        btn.classList.add('active');
+        state.gender = btn.dataset.gender;
+      } else {
+        state.gender = null; // Let AI infer
+      }
+
+      triggerHaptic('light');
     });
   }
 

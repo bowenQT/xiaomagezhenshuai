@@ -1,12 +1,46 @@
 import { QiniuAI } from '@bowenqt/qiniu-ai-sdk';
 
-// 人设到音色的映射
-const PERSONA_VOICE_MAP = {
-    gentle: 'qiniu_zh_female_tmjxxy',      // 温柔的 - 甜美温柔
-    strict: 'qiniu_zh_male_chengshuwenzhong', // 严厉的 - 成熟稳重
-    playful: 'qiniu_zh_female_huopoqiaopi',   // 幽默的 - 活泼俏皮
-    regretful: 'qiniu_zh_female_shenchenneilian' // 遗憾的 - 深沉内敛
+// 人设 × 性别 → 音色 映射矩阵
+const VOICE_MATRIX = {
+    gentle: {
+        female: 'qiniu_zh_female_tmjxxy',    // 甜美教学小源
+        male: 'qiniu_zh_male_wncwxz',        // 温暖沉稳学长
+        default: 'qiniu_zh_female_wwxkjx'    // 温婉学科讲师
+    },
+    strict: {
+        female: 'qiniu_zh_female_glktss',    // 干练课堂思思
+        male: 'qiniu_zh_male_ybxknjs',       // 渊博学科男教师
+        default: 'qiniu_zh_female_glktss'
+    },
+    playful: {
+        female: 'qiniu_zh_female_kljxdd',    // 开朗教学督导
+        male: 'qiniu_zh_male_tyygjs',        // 通用阳光讲师
+        default: 'qiniu_zh_male_hllzmz'      // 活力率真萌仔
+    },
+    regretful: {
+        female: 'qiniu_zh_female_wwxkjx',    // 温婉学科讲师
+        male: 'qiniu_zh_male_wncwxz',        // 温暖沉稳学长
+        default: 'qiniu_zh_female_wwkjby'    // 温婉课件配音
+    }
 };
+
+// 默认音色（无人设选择时）
+const DEFAULT_VOICES = {
+    female: 'qiniu_zh_female_tmjxxy',
+    male: 'qiniu_zh_male_wncwxz',
+    default: 'qiniu_zh_female_tmjxxy'
+};
+
+/**
+ * 动态选择音色
+ * @param {string|null} persona - 人设类型
+ * @param {string|null} gender - 性别 ('female' | 'male' | null)
+ * @returns {string} 音色 ID
+ */
+function selectVoice(persona, gender) {
+    const personaMap = VOICE_MATRIX[persona] || DEFAULT_VOICES;
+    return personaMap[gender] || personaMap.default;
+}
 
 export default async function handler(req, res) {
     // Only allow POST
@@ -14,7 +48,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { text, voiceType, persona } = req.body;
+    const { text, voiceType, persona, gender } = req.body;
 
     if (!text || text.trim().length === 0) {
         return res.status(400).json({ error: 'Text is required' });
@@ -25,8 +59,8 @@ export default async function handler(req, res) {
         apiKey: process.env.QINIU_API_KEY
     });
 
-    // 根据人设选择音色（优先级：voiceType > persona mapping > default）
-    const selectedVoice = voiceType || PERSONA_VOICE_MAP[persona] || 'qiniu_zh_female_tmjxxy';
+    // 动态选择音色（优先级：voiceType > persona×gender mapping > default）
+    const selectedVoice = voiceType || selectVoice(persona, gender);
 
     try {
         // 使用 SDK 的 TTS synthesize 方法

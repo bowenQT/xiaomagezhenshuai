@@ -44,12 +44,22 @@
       
       <div class="recipient-section">
         <label class="recipient-label">这段话是写给谁的？（可选）</label>
-        <input 
-          type="text" 
-          id="recipient" 
-          class="recipient-input" 
-          placeholder="前任、暗恋的人、已故的亲人..."
-        >
+        <div class="recipient-row">
+          <input 
+            type="text" 
+            id="recipient" 
+            class="recipient-input" 
+            placeholder="前任、暗恋的人、已故的亲人..."
+          >
+          <div class="gender-picker" id="gender-picker">
+            <button class="gender-btn" data-gender="female" title="女性">
+              <span class="gender-icon">♀</span>
+            </button>
+            <button class="gender-btn" data-gender="male" title="男性">
+              <span class="gender-icon">♂</span>
+            </button>
+          </div>
+        </div>
       </div>
       
       <!-- Persona Tags -->
