@@ -929,3 +929,48 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ===================================
+   V1.2 Ember Sky Tooltip
+   =================================== */
+
+.ember-tooltip {
+  position: fixed;
+  z-index: 100;
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: var(--space-sm) var(--space-md);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  max-width: 250px;
+}
+
+.ember-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ember-tooltip-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ember-tooltip-content strong {
+  color: var(--accent-gold);
+}
+
+.ember-tooltip-content .emotion-tag {
+  color: var(--accent-amber);
+  font-weight: 500;
+}
+
+/* Ambient canvas pointer events for interaction */
+#ambient-canvas {
+  pointer-events: auto;
+}

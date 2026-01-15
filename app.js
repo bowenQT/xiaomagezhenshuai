@@ -3,6 +3,9 @@
  * 主交互逻辑
  */
 
+import { EmberSky } from './src/ember-sky.js';
+import { supabase } from './src/supabase.js';
+
 // ============================================
 // State Management
 // ============================================
@@ -45,7 +48,9 @@ const elements = {
   shareModal: document.getElementById('share-modal'),
   modalClose: document.getElementById('modal-close'),
   shareCardPreview: document.getElementById('share-card-preview'),
-  downloadButton: document.getElementById('download-button')
+  downloadButton: document.getElementById('download-button'),
+  // V1.2 新元素
+  emberTooltip: document.getElementById('ember-tooltip')
 };
 
 // ============================================
@@ -452,6 +457,31 @@ function completeBurn() {
       transitionToReply();
     }, 1500);
   }, 1000);
+
+  // V1.2: 保存信件到 Supabase (异步，不阻塞流程)
+  saveLetterToSupabase();
+}
+
+// V1.2: 保存信件到 Supabase
+async function saveLetterToSupabase() {
+  // 根据 persona 和内容推测情绪
+  const emotionMap = {
+    gentle: 'gratitude',
+    strict: 'release',
+    playful: 'love',
+    regretful: 'regret'
+  };
+
+  const emotion = emotionMap[state.persona] || 'release';
+  const recipient = state.recipient || '某人';
+
+  try {
+    await supabase.insertLetter(recipient, emotion);
+    console.log('✨ 信件已记录到余烬星空');
+  } catch (error) {
+    console.warn('Failed to save letter:', error);
+    // 不影响主流程
+  }
 }
 
 // ============================================
@@ -542,8 +572,15 @@ function initEventListeners() {
 // Initialize
 // ============================================
 function init() {
-  // Initialize ambient particles
-  new AmbientParticles(elements.ambientCanvas);
+  // Initialize Ember Sky (V1.2) - replaces AmbientParticles
+  try {
+    new EmberSky(elements.ambientCanvas, elements.emberTooltip);
+    console.log('✨ 余烬星空已启动');
+  } catch (error) {
+    // Fallback to simple ambient particles
+    console.warn('EmberSky failed, using fallback:', error);
+    new AmbientParticles(elements.ambientCanvas);
+  }
 
   // Initialize event listeners
   initEventListeners();
