@@ -441,15 +441,59 @@ function closeShareModal() {
   elements.shareModal.classList.remove('active');
 }
 
-function downloadShareCard() {
+async function downloadShareCard() {
   if (!currentShareCardUrl) return;
 
-  const link = document.createElement('a');
-  link.href = currentShareCardUrl;
-  link.download = `parallel-letter-${Date.now()}.png`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  try {
+    let blob;
+
+    // 如果是 base64 数据
+    if (currentShareCardUrl.startsWith('data:')) {
+      const response = await fetch(currentShareCardUrl);
+      blob = await response.blob();
+    } else {
+      // 如果是 URL，需要 fetch 并转换为 Blob
+      try {
+        const response = await fetch(currentShareCardUrl);
+        blob = await response.blob();
+      } catch {
+        // 如果跨域失败，尝试用 canvas 方式
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = currentShareCardUrl;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+
+        blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      }
+    }
+
+    // 创建 Blob URL 并下载
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = `平行时空信笺_${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 清理 Blob URL
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+
+    triggerHaptic('success');
+  } catch (error) {
+    console.error('Download failed:', error);
+    // 降级方案：新标签页打开
+    window.open(currentShareCardUrl, '_blank');
+    triggerHaptic('error');
+  }
 }
 
 // ============================================
@@ -484,7 +528,10 @@ async function playReplyAudio() {
     const response = await fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: currentReplyText })
+      body: JSON.stringify({
+        text: currentReplyText,
+        persona: state.persona // 传递人设以匹配音色
+      })
     });
 
     if (!response.ok) {

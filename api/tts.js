@@ -1,12 +1,20 @@
 import { QiniuAI } from '@bowenqt/qiniu-ai-sdk';
 
+// 人设到音色的映射
+const PERSONA_VOICE_MAP = {
+    gentle: 'qiniu_zh_female_tmjxxy',      // 温柔的 - 甜美温柔
+    strict: 'qiniu_zh_male_chengshuwenzhong', // 严厉的 - 成熟稳重
+    playful: 'qiniu_zh_female_huopoqiaopi',   // 幽默的 - 活泼俏皮
+    regretful: 'qiniu_zh_female_shenchenneilian' // 遗憾的 - 深沉内敛
+};
+
 export default async function handler(req, res) {
     // Only allow POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { text, voiceType } = req.body;
+    const { text, voiceType, persona } = req.body;
 
     if (!text || text.trim().length === 0) {
         return res.status(400).json({ error: 'Text is required' });
@@ -17,11 +25,14 @@ export default async function handler(req, res) {
         apiKey: process.env.QINIU_API_KEY
     });
 
+    // 根据人设选择音色（优先级：voiceType > persona mapping > default）
+    const selectedVoice = voiceType || PERSONA_VOICE_MAP[persona] || 'qiniu_zh_female_tmjxxy';
+
     try {
         // 使用 SDK 的 TTS synthesize 方法
         const result = await client.tts.synthesize({
             text: text.substring(0, 1000), // 限制长度
-            voice_type: voiceType || 'qiniu_zh_female_tmjxxy', // 甜美教学小源
+            voice_type: selectedVoice,
             encoding: 'mp3',
             speed_ratio: 1.0
         });

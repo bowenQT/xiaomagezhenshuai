@@ -987,13 +987,17 @@ body {
 
 .upload-status {
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: var(--space-sm);
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
+  max-width: 100%;
+  padding: 0 var(--space-sm);
 }
 
 .copy-link-btn {
