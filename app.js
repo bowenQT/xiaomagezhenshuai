@@ -34,6 +34,7 @@ const elements = {
   messageInput: document.getElementById('unsent-message'),
   recipientInput: document.getElementById('recipient'),
   charCount: document.getElementById('char-current'),
+  submitButton: document.getElementById('submit-button'),
   letterContent: document.getElementById('letter-content'),
   letter: document.getElementById('letter'),
   burnButton: document.getElementById('burn-button'),
@@ -411,14 +412,9 @@ function initEventListeners() {
     }
   });
 
-  // Also allow clicking anywhere on input section when there's content to proceed
-  elements.inputSection.addEventListener('click', (e) => {
-    // Only if clicking outside the inputs and there's content
-    if (!e.target.closest('textarea') &&
-      !e.target.closest('input') &&
-      elements.messageInput.value.trim().length > 0) {
-      transitionToCremate();
-    }
+  // Submit button click
+  elements.submitButton.addEventListener('click', () => {
+    transitionToCremate();
   });
 
   // Burn button interactions

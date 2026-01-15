@@ -15,11 +15,11 @@
   --accent-amber: #ea580c;
   --accent-ember: #dc2626;
   --border-subtle: rgba(255, 255, 255, 0.08);
-  
+
   /* Typography */
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Noto Sans SC', -apple-system, sans-serif;
-  
+
   /* Spacing */
   --space-xs: 0.5rem;
   --space-sm: 1rem;
@@ -27,14 +27,16 @@
   --space-lg: 2rem;
   --space-xl: 3rem;
   --space-2xl: 5rem;
-  
+
   /* Animation */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset & Base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -150,7 +152,7 @@ body {
   outline: none;
   border-color: var(--accent-gold);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1),
-              0 0 30px rgba(245, 158, 11, 0.05);
+    0 0 30px rgba(245, 158, 11, 0.05);
 }
 
 .char-count {
@@ -191,6 +193,134 @@ body {
 .recipient-input:focus {
   outline: none;
   border-color: var(--accent-gold);
+}
+
+/* Submit Button - Dark Ethereal Style */
+.submit-button {
+  position: relative;
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  margin-top: var(--space-md);
+  background: linear-gradient(135deg,
+      rgba(245, 158, 11, 0.1) 0%,
+      rgba(234, 88, 12, 0.08) 50%,
+      rgba(220, 38, 38, 0.05) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s var(--ease-out-expo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(245, 158, 11, 0.15),
+      transparent);
+  transition: left 0.6s var(--ease-out-expo);
+}
+
+.submit-button:hover {
+  border-color: var(--accent-gold);
+  box-shadow:
+    0 0 30px rgba(245, 158, 11, 0.2),
+    0 0 60px rgba(245, 158, 11, 0.1),
+    inset 0 0 20px rgba(245, 158, 11, 0.05);
+  transform: translateY(-2px);
+}
+
+.submit-button:hover::before {
+  left: 100%;
+}
+
+.submit-button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 0 20px rgba(245, 158, 11, 0.15),
+    inset 0 0 15px rgba(245, 158, 11, 0.08);
+}
+
+.submit-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-icon {
+  font-size: 1.3rem;
+  animation: flameFlicker 1.5s ease-in-out infinite;
+}
+
+.submit-text {
+  position: relative;
+  z-index: 1;
+}
+
+.submit-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.submit-button:hover .submit-particles {
+  animation: particleFloat 1s ease-out infinite;
+}
+
+@keyframes flameFlicker {
+
+  0%,
+  100% {
+    transform: scale(1) rotate(-3deg);
+    filter: brightness(1);
+  }
+
+  25% {
+    transform: scale(1.05) rotate(2deg);
+    filter: brightness(1.1);
+  }
+
+  50% {
+    transform: scale(1) rotate(-1deg);
+    filter: brightness(0.95);
+  }
+
+  75% {
+    transform: scale(1.02) rotate(1deg);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -200%) scale(0.5);
+  }
 }
 
 /* Cremation Section */
@@ -461,8 +591,13 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
@@ -470,6 +605,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -477,8 +613,15 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes charBurn {
@@ -486,14 +629,17 @@ body {
     filter: none;
     opacity: 1;
   }
+
   30% {
     filter: brightness(1.5) saturate(0.5);
     color: var(--accent-amber);
   }
+
   60% {
     filter: brightness(0.8) saturate(0.3) blur(1px);
     color: #4a4a4a;
   }
+
   100% {
     filter: brightness(0.2) blur(2px);
     opacity: 0;
@@ -502,8 +648,15 @@ body {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* Responsive */
@@ -511,15 +664,15 @@ body {
   .container {
     padding: var(--space-md);
   }
-  
+
   .title {
     font-size: 1.8rem;
   }
-  
+
   .message-input {
     min-height: 180px;
   }
-  
+
   .burn-button {
     width: 100px;
     height: 100px;
