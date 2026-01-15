@@ -8,6 +8,9 @@
     "functions": {
         "api/reply.js": {
             "maxDuration": 30
+        },
+        "api/share-card.js": {
+            "maxDuration": 120
         }
     }
 }

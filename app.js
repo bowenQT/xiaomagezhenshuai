@@ -10,6 +10,8 @@ const state = {
   phase: 'input', // 'input' | 'burning' | 'reply'
   message: '',
   recipient: '',
+  persona: null, // 'gentle' | 'strict' | 'playful' | 'regretful'
+  extractedQuote: '',
   isHolding: false,
   holdStartTime: 0,
   holdDuration: 1500, // 1.5 seconds to burn
@@ -36,7 +38,14 @@ const elements = {
   envelope: document.getElementById('envelope'),
   replyContent: document.getElementById('reply-content'),
   replySignature: document.getElementById('reply-signature'),
-  restartButton: document.getElementById('restart-button')
+  restartButton: document.getElementById('restart-button'),
+  // V1.1 新元素
+  personaChips: document.getElementById('persona-chips'),
+  shareButton: document.getElementById('share-button'),
+  shareModal: document.getElementById('share-modal'),
+  modalClose: document.getElementById('modal-close'),
+  shareCardPreview: document.getElementById('share-card-preview'),
+  downloadButton: document.getElementById('download-button')
 };
 
 // ============================================
@@ -178,12 +187,12 @@ class FireParticles {
 // ============================================
 // AI Reply Generation
 // ============================================
-async function generateReply(message, recipient) {
+async function generateReply(message, recipient, persona) {
   try {
     const response = await fetch('/api/reply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, recipient })
+      body: JSON.stringify({ message, recipient, persona })
     });
 
     if (!response.ok) {
@@ -191,6 +200,8 @@ async function generateReply(message, recipient) {
     }
 
     const data = await response.json();
+    // 保存金句用于分享
+    state.extractedQuote = data.extracted_quote || '';
     return data.reply;
   } catch (error) {
     console.error('AI generation failed:', error);
@@ -247,7 +258,7 @@ async function transitionToReply() {
 
   // Generate AI reply
   try {
-    const reply = await generateReply(state.message, state.recipient);
+    const reply = await generateReply(state.message, state.recipient, state.persona);
     elements.replyContent.classList.remove('loading');
 
     // Typewriter effect
@@ -277,6 +288,13 @@ async function typewriterEffect(element, text) {
 function restart() {
   state.message = '';
   state.recipient = '';
+  state.persona = null;
+  state.extractedQuote = '';
+
+  // Reset persona chips
+  document.querySelectorAll('.persona-chip').forEach(chip => {
+    chip.classList.remove('active');
+  });
   elements.messageInput.value = '';
   elements.recipientInput.value = '';
   elements.charCount.textContent = '0';
@@ -285,6 +303,74 @@ function restart() {
   elements.replyContent.textContent = '';
   elements.replySignature.textContent = '';
   showPhase('input');
+}
+
+// ============================================
+// V1.1 Share Card Functions
+// ============================================
+let currentShareCardUrl = null;
+
+async function openShareModal() {
+  if (!elements.shareModal) return;
+
+  elements.shareModal.classList.add('active');
+  elements.shareCardPreview.innerHTML = '<p class="preview-loading">正在生成艺术卡片...</p>';
+  elements.downloadButton.disabled = true;
+
+  try {
+    const response = await fetch('/api/share-card', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quote: state.extractedQuote || '愿你一切都好',
+        recipient: state.recipient || '那个人',
+        count: Math.floor(Math.random() * 50000) + 10000
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate card');
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.image) {
+      const imgSrc = data.isBase64
+        ? `data:image/png;base64,${data.image}`
+        : data.image;
+
+      currentShareCardUrl = imgSrc;
+      elements.shareCardPreview.innerHTML = `<img src="${imgSrc}" alt="平行时空信笺" />`;
+      elements.downloadButton.disabled = false;
+    } else {
+      throw new Error('No image in response');
+    }
+  } catch (error) {
+    console.error('Share card generation failed:', error);
+    elements.shareCardPreview.innerHTML = `
+      <div style="text-align: center; color: var(--text-secondary);">
+        <p>🌟</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">卡片生成中遇到问题</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">${state.extractedQuote || '愿你一切都好'}</p>
+      </div>
+    `;
+  }
+}
+
+function closeShareModal() {
+  if (!elements.shareModal) return;
+  elements.shareModal.classList.remove('active');
+}
+
+function downloadShareCard() {
+  if (!currentShareCardUrl) return;
+
+  const link = document.createElement('a');
+  link.href = currentShareCardUrl;
+  link.download = `parallel-letter-${Date.now()}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // ============================================
@@ -407,6 +493,49 @@ function initEventListeners() {
 
   // Restart button
   elements.restartButton.addEventListener('click', restart);
+
+  // V1.1: Persona chip selection
+  if (elements.personaChips) {
+    elements.personaChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.persona-chip');
+      if (!chip) return;
+
+      // Toggle selection
+      const wasActive = chip.classList.contains('active');
+      document.querySelectorAll('.persona-chip').forEach(c => c.classList.remove('active'));
+
+      if (!wasActive) {
+        chip.classList.add('active');
+        state.persona = chip.dataset.persona;
+      } else {
+        state.persona = null;
+      }
+    });
+  }
+
+  // V1.1: Share button
+  if (elements.shareButton) {
+    elements.shareButton.addEventListener('click', openShareModal);
+  }
+
+  // V1.1: Modal close
+  if (elements.modalClose) {
+    elements.modalClose.addEventListener('click', closeShareModal);
+  }
+
+  // V1.1: Download button
+  if (elements.downloadButton) {
+    elements.downloadButton.addEventListener('click', downloadShareCard);
+  }
+
+  // Close modal on backdrop click
+  if (elements.shareModal) {
+    elements.shareModal.addEventListener('click', (e) => {
+      if (e.target === elements.shareModal) {
+        closeShareModal();
+      }
+    });
+  }
 }
 
 // ============================================

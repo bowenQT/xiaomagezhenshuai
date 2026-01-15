@@ -49,6 +49,29 @@
         >
       </div>
       
+      <!-- Persona Tags -->
+      <div class="persona-section">
+        <label class="persona-label">Ta 是个什么样的人？（可选）</label>
+        <div class="persona-chips" id="persona-chips">
+          <button class="persona-chip" data-persona="gentle">
+            <span class="chip-emoji">🌸</span>
+            <span class="chip-text">温柔的</span>
+          </button>
+          <button class="persona-chip" data-persona="strict">
+            <span class="chip-emoji">⚡</span>
+            <span class="chip-text">严厉的</span>
+          </button>
+          <button class="persona-chip" data-persona="playful">
+            <span class="chip-emoji">😄</span>
+            <span class="chip-text">搞怪的</span>
+          </button>
+          <button class="persona-chip" data-persona="regretful">
+            <span class="chip-emoji">🌙</span>
+            <span class="chip-text">遗憾的</span>
+          </button>
+        </div>
+      </div>
+      
       <!-- Submit Button -->
       <button class="submit-button" id="submit-button">
         <span class="submit-icon">🔥</span>
@@ -93,9 +116,32 @@
         </div>
       </div>
       
-      <button class="restart-button" id="restart-button">
-        再写一封
-      </button>
+      <!-- Action Buttons -->
+      <div class="reply-actions">
+        <button class="share-button" id="share-button">
+          <span class="share-icon">✨</span>
+          <span class="share-text">留作纪念</span>
+        </button>
+        <button class="restart-button" id="restart-button">
+          再写一封
+        </button>
+      </div>
+      
+      <!-- Share Card Preview Modal -->
+      <div class="share-modal" id="share-modal">
+        <div class="share-modal-content">
+          <button class="modal-close" id="modal-close">×</button>
+          <h3 class="modal-title">你的平行时空信笺</h3>
+          <div class="share-card-preview" id="share-card-preview">
+            <p class="preview-loading">正在生成艺术卡片...</p>
+          </div>
+          <div class="share-actions">
+            <button class="download-button" id="download-button">
+              📥 保存图片
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
