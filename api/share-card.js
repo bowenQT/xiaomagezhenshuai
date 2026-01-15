@@ -46,32 +46,41 @@ COMPOSITION:
 - Premium, healing, ceremonial aesthetic
 - Suitable for sharing on social platforms like WeChat Moments or Xiaohongshu
 
-DO NOT include any watermarks, logos, or promotional text.`,
-            image_config: {
-                aspect_ratio: '9:16',
-                image_size: '2K'
-            }
+DO NOT include any watermarks, logos, or promotional text.`
         });
 
-        // Wait for result if async
+        // Wait for result if async (task_id present)
         let finalResult = imageResult;
-        if (imageResult.task_id) {
+        if (!imageResult.isSync && imageResult.task_id) {
             finalResult = await client.image.waitForResult(imageResult, {
                 timeoutMs: 120000
             });
         }
 
         // Extract image URL or base64
-        const imageUrl = finalResult.data?.[0]?.url || finalResult.data?.[0]?.b64_json;
+        let imageUrl = null;
+        let isBase64 = false;
+
+        if (finalResult.data && Array.isArray(finalResult.data) && finalResult.data.length > 0) {
+            const firstImage = finalResult.data[0];
+            if (firstImage.url) {
+                imageUrl = firstImage.url;
+                isBase64 = false;
+            } else if (firstImage.b64_json) {
+                imageUrl = firstImage.b64_json;
+                isBase64 = true;
+            }
+        }
 
         if (!imageUrl) {
+            console.error('No image in response:', JSON.stringify(finalResult, null, 2));
             throw new Error('No image generated');
         }
 
         return res.status(200).json({
             success: true,
             image: imageUrl,
-            isBase64: !finalResult.data?.[0]?.url
+            isBase64: isBase64
         });
 
     } catch (error) {
@@ -84,3 +93,4 @@ DO NOT include any watermarks, logos, or promotional text.`,
         });
     }
 }
+

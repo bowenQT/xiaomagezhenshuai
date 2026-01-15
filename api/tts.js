@@ -18,28 +18,21 @@ export default async function handler(req, res) {
     });
 
     try {
-        // Call Qiniu TTS API
-        // 使用温柔女声，适合治愈系回信
-        const response = await client.post('/voice/tts', {
-            request: {
-                text: text.substring(0, 1000) // 限制长度
-            },
-            audio: {
-                voice_type: voiceType || 'qiniu_zh_female_tmjxxy' // 甜美教学小源
-            }
+        // 使用 SDK 的 TTS synthesize 方法
+        const result = await client.tts.synthesize({
+            text: text.substring(0, 1000), // 限制长度
+            voice_type: voiceType || 'qiniu_zh_female_tmjxxy', // 甜美教学小源
+            encoding: 'mp3',
+            speed_ratio: 1.0
         });
 
-        // 返回音频 URL 或 base64
-        if (response.data?.audio_url) {
+        // 返回 base64 音频
+        if (result.audio) {
             return res.status(200).json({
                 success: true,
-                audioUrl: response.data.audio_url
-            });
-        } else if (response.data?.audio) {
-            return res.status(200).json({
-                success: true,
-                audioBase64: response.data.audio,
-                contentType: 'audio/mp3'
+                audioBase64: result.audio,
+                contentType: 'audio/mp3',
+                duration: result.duration
             });
         } else {
             throw new Error('No audio in response');
