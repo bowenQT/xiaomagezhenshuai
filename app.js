@@ -345,13 +345,20 @@ async function openShareModal() {
     const data = await response.json();
 
     if (data.success && data.image) {
-      const imgSrc = data.isBase64
+      let imgSrc = data.isBase64
         ? `data:image/png;base64,${data.image}`
         : data.image;
 
+      // 先显示图片（可能是临时 URL）
       currentShareCardUrl = imgSrc;
-      elements.shareCardPreview.innerHTML = `<img src="${imgSrc}" alt="平行时空信笺" />`;
+      elements.shareCardPreview.innerHTML = `
+        <img src="${imgSrc}" alt="平行时空信笺" />
+        <p class="upload-status" id="upload-status">正在保存到云端...</p>
+      `;
       elements.downloadButton.disabled = false;
+
+      // 异步上传到 Supabase Storage 获取持久化 URL
+      uploadToStorage(data.image, data.isBase64);
     } else {
       throw new Error('No image in response');
     }
@@ -366,6 +373,68 @@ async function openShareModal() {
     `;
   }
 }
+
+// 上传图片到 Supabase Storage
+async function uploadToStorage(imageData, isBase64) {
+  try {
+    let blob;
+
+    if (isBase64) {
+      // 将 base64 转换为 Blob
+      const byteCharacters = atob(imageData);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      blob = new Blob([byteArray], { type: 'image/png' });
+    } else {
+      // 从 URL 获取图片
+      const response = await fetch(imageData);
+      blob = await response.blob();
+    }
+
+    // 生成唯一文件名
+    const filename = `card_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
+
+    // 上传到 Supabase Storage
+    const permanentUrl = await supabase.uploadShareCard(blob, filename);
+
+    // 更新为持久化 URL
+    currentShareCardUrl = permanentUrl;
+
+    // 更新 UI
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) {
+      statusEl.innerHTML = `
+        <span style="color: var(--accent-gold);">✓ 已保存到云端</span>
+        <button class="copy-link-btn" onclick="copyShareLink()">复制链接</button>
+      `;
+    }
+
+    console.log('✨ 图片已上传到 Supabase Storage:', permanentUrl);
+  } catch (error) {
+    console.warn('Storage upload failed:', error);
+    // 失败时保持使用临时 URL
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) {
+      statusEl.textContent = '(使用临时链接)';
+    }
+  }
+}
+
+// 复制分享链接
+window.copyShareLink = function () {
+  if (currentShareCardUrl && navigator.clipboard) {
+    navigator.clipboard.writeText(currentShareCardUrl).then(() => {
+      const btn = document.querySelector('.copy-link-btn');
+      if (btn) {
+        btn.textContent = '已复制!';
+        setTimeout(() => btn.textContent = '复制链接', 2000);
+      }
+    });
+  }
+};
 
 function closeShareModal() {
   if (!elements.shareModal) return;
