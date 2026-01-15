@@ -1,8 +1,12 @@
 {
   "name": "xiaomagezhenshuai",
   "version": "1.0.0",
-  "description": "",
+  "description": "未发送信件焚烧炉 | The Unsent Crematorium",
   "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
