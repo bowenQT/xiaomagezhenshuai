@@ -35,6 +35,7 @@ export class EmberSky {
         this.embers = [];
         this.recentLetters = [];
         this.activeEmber = null;
+        this.isDestroyed = false; // 用于停止动画循环
 
         this.resize();
         this.init();
@@ -176,6 +177,9 @@ export class EmberSky {
     }
 
     animate() {
+        // 检查是否已销毁
+        if (this.isDestroyed) return;
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (const ember of this.embers) {
@@ -228,6 +232,7 @@ export class EmberSky {
     }
 
     destroy() {
+        this.isDestroyed = true;
         if (this.unsubscribe) this.unsubscribe();
     }
 }
